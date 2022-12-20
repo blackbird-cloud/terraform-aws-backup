@@ -96,4 +96,5 @@ module "backup" {
   depends_on = [
     aws_iam_role.backupper
   ]
+  destination_vault_arn = var.copy_destination_vault_arn
 }

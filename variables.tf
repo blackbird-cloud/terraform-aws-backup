@@ -42,3 +42,9 @@ variable "resources_kms_key_arns" {
   description = "Resource KMS key arns used to decrypt for backup"
   default     = []
 }
+
+variable "copy_destination_vault_arn" {
+  description = "An Amazon Resource Name (ARN) that uniquely identifies the destination backup vault for the copied backup"
+  type        = string
+  default     = null
+}
