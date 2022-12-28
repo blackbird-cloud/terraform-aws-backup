@@ -44,4 +44,6 @@ No modules.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_vault"></a> [vault](#output\_vault) | AWS Backup Vault |
