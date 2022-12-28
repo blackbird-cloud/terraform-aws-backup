@@ -68,11 +68,11 @@ resource "aws_backup_selection" "selection" {
   resources     = try(var.selection.resources, [])
   not_resources = try(var.selection.not_resources, [])
   dynamic "selection_tag" {
-    for_each = try(var.selection.selection_tags, [])
+    for_each = try(var.selection.tags, [])
     content {
-      type  = selection_tag.value["type"]
-      key   = selection_tag.value["key"]
-      value = selection_tag.value["value"]
+      type  = selection_tag.value.type
+      key   = selection_tag.value.key
+      value = selection_tag.value.value
     }
   }
 }
