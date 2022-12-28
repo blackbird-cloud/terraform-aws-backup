@@ -3,48 +3,94 @@ variable "name" {
   description = "Name of backup resource"
 }
 
-variable "backup_resources" {
-  type        = set(string)
-  description = "Set of resources ARN to be backed up"
+variable "create_backup_region_settings" {
+  type        = bool
+  default     = true
+  description = "(Optional) Create an AWS Backup Region Settings resource."
 }
 
-variable "schedule" {
+variable "create_backup_plan" {
+  type        = bool
+  default     = true
+  description = "(Optional) Create an AWS Backup plan, requires the rules variable to be configured as well."
+}
+
+variable "create_backup_vault_policy" {
+  type        = bool
+  default     = false
+  description = "(Optional) Create an AWS Backup Policy"
+}
+
+variable "resource_type_opt_in_preference" {
+  default = {
+    "Aurora"          = true
+    "DocumentDB"      = true
+    "DynamoDB"        = true
+    "EBS"             = true
+    "EC2"             = true
+    "EFS"             = true
+    "FSx"             = true
+    "Neptune"         = true
+    "RDS"             = true
+    "Storage Gateway" = true
+    "VirtualMachine"  = true
+  }
+  type        = any
+  description = "(Optional) A map of services along with the opt-in preferences for the Region."
+}
+
+variable "resource_type_management_preference" {
+  type        = any
+  description = "(Optional) A map of services along with the management preferences for the Region."
+  default = {
+    "DynamoDB" = true
+    "EFS"      = true
+  }
+}
+
+variable "selection" {
+  type = object({
+    resources : list(string),
+    not_resources : list(string),
+    tags : list(object({
+      type  = string
+      key   = string
+      value = string
+    }))
+  })
+  default = {
+    not_resources = []
+    resources     = []
+    tags          = []
+  }
+  description = "(Optional) Manages selection conditions for AWS Backup plan resources."
+}
+
+variable "kms_key_arn" {
   type        = string
-  description = "Backup schedule in cron expression"
+  description = "(Optional) The server-side encryption key that is used to protect your backups."
 }
 
-variable "start_window" {
-  type        = number
-  description = "The amount of time in minutes before beginning a backup. Minimum value is 60 minutes"
-  default     = null
+variable "tags" {
+  description = "(Optional) Metadata that you can assign to help organize the resources that you create. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level."
+  type        = map(string)
+  default     = {}
 }
 
-variable "completion_window" {
-  type        = number
-  description = "The amount of time AWS Backup attempts a backup before canceling the job and returning an error. Must be at least 60 minutes greater than start_window."
-  default     = null
-}
-
-variable "cold_storage_after" {
-  type        = number
-  description = "Specifies the number of days after creation that a recovery point is moved to cold storage"
-  default     = null
-}
-
-variable "delete_after" {
-  type        = number
-  description = "Number of days before backup is deleted"
-  default     = null
-}
-
-variable "resources_kms_key_arns" {
-  type        = set(string)
-  description = "Resource KMS key arns used to decrypt for backup"
+variable "rules" {
+  type        = list(any)
+  description = "(Optional) An list of rules to create for the backup plan."
   default     = []
 }
 
-variable "copy_destination_vault_arn" {
-  description = "An Amazon Resource Name (ARN) that uniquely identifies the destination backup vault for the copied backup"
+variable "iam_role_arn" {
+  type        = string
+  default     = ""
+  description = "(Optional) IAM role arn to use when making backups."
+}
+
+variable "vault_policy" {
   type        = string
   default     = null
+  description = "(Optional) The backup vault access policy document in JSON format."
 }

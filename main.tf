@@ -1,100 +1,85 @@
-resource "aws_kms_key" "aws_backup" {
-  description         = "${var.name} AWS Backup KMS key"
-  enable_key_rotation = true
-  lifecycle {
-    prevent_destroy = true
-  }
+resource "aws_backup_region_settings" "settings" {
+  count = var.create_backup_region_settings ? 1 : 0
+
+  resource_type_opt_in_preference     = var.resource_type_opt_in_preference
+  resource_type_management_preference = var.resource_type_management_preference
 }
 
-data "aws_partition" "current" {}
+resource "aws_backup_vault" "vault" {
+  name        = var.name
+  kms_key_arn = var.kms_key_arn
+  tags        = var.tags
+}
 
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
+resource "aws_backup_plan" "plan" {
+  count = var.create_backup_plan && length(var.rules) > 0 ? 1 : 0
 
-    principals {
-      type        = "Service"
-      identifiers = ["backup.amazonaws.com"]
+  name = var.name
+
+  dynamic "rule" {
+    for_each = var.rules
+
+    content {
+      completion_window        = lookup(rule.value, "completion_window", null)
+      enable_continuous_backup = lookup(rule.value, "enable_continuous_backup", null)
+      recovery_point_tags      = var.tags
+      rule_name                = lookup(rule.value, "name", "rule-${rule.key}")
+      schedule                 = lookup(rule.value, "schedule", null)
+      start_window             = lookup(rule.value, "start_window", null)
+      target_vault_name        = aws_backup_vault.vault.name
+
+      dynamic "lifecycle" {
+        for_each = lookup(rule.value, "lifecycle", null) != null ? [true] : []
+
+        content {
+          cold_storage_after = lookup(rule.value.lifecycle, "cold_storage_after", null)
+          delete_after       = lookup(rule.value.lifecycle, "delete_after", null)
+        }
+      }
+
+      dynamic "copy_action" {
+        for_each = lookup(rule.value, "copy_actions", [])
+
+        content {
+          destination_vault_arn = lookup(rule.value.copy_action, "destination_vault_arn", null)
+
+          dynamic "lifecycle" {
+            for_each = lookup(rule.value.copy_action, "lifecycle", null) != null != null ? [true] : []
+
+            content {
+              cold_storage_after = lookup(rule.value.copy_action.lifecycle, "cold_storage_after", null)
+              delete_after       = lookup(rule.value.copy_action.lifecycle, "delete_after", null)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  tags = var.tags
+}
+
+resource "aws_backup_selection" "selection" {
+  count = var.create_backup_plan ? 1 : 0
+
+  name          = var.name
+  iam_role_arn  = var.iam_role_arn
+  plan_id       = aws_backup_plan.plan[0].id
+  resources     = try(var.selection.resources, [])
+  not_resources = try(var.selection.not_resources, [])
+  dynamic "selection_tag" {
+    for_each = try(var.selection.selection_tags, [])
+    content {
+      type  = selection_tag.value["type"]
+      key   = selection_tag.value["key"]
+      value = selection_tag.value["value"]
     }
   }
 }
 
-data "aws_iam_policy_document" "kms_access" {
-  statement {
-    sid    = "AllowKMSKey"
-    effect = "Allow"
-    actions = [
-      "kms:Encrypt",
-      "kms:Decrypt",
-      "kms:ReEncryptFrom",
-      "kms:ReEncryptTo",
-      "kms:GenerateDataKey",
-      "kms:GenerateDataKeyWithoutPlaintext",
-      "kms:GenerateDataKeyPair",
-      "kms:GenerateDataKeyPairWithoutPlaintext",
-      "kms:DescribeKey"
-    ]
-    resources = var.resources_kms_key_arns
-  }
-}
+resource "aws_backup_vault_policy" "policy" {
+  count = var.create_backup_vault_policy ? 1 : 0
 
-resource "aws_iam_policy" "kms_access" {
-  policy = data.aws_iam_policy_document.kms_access.json
-  name   = var.name
-}
-
-resource "aws_iam_role" "backupper" {
-  name               = var.name
-  assume_role_policy = join("", data.aws_iam_policy_document.assume_role.*.json)
-}
-
-resource "aws_iam_role_policy_attachment" "allow_kms_access" {
-  policy_arn = aws_iam_policy.kms_access.arn
-  role       = aws_iam_role.backupper.name
-}
-
-resource "aws_iam_role_policy_attachment" "allow_backup" {
-  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
-  role       = aws_iam_role.backupper.name
-}
-
-resource "aws_backup_region_settings" "test" {
-  resource_type_opt_in_preference = {
-    "Aurora"          = true
-    "DocumentDB"      = true
-    "DynamoDB"        = true
-    "EBS"             = true
-    "EC2"             = true
-    "EFS"             = true
-    "FSx"             = true
-    "Neptune"         = true
-    "RDS"             = true
-    "Storage Gateway" = true
-    "VirtualMachine"  = true
-  }
-
-  resource_type_management_preference = {
-    "DynamoDB" = true
-    "EFS"      = true
-  }
-}
-
-module "backup" {
-  source             = "cloudposse/backup/aws"
-  version            = "0.12.0"
-  name               = var.name
-  backup_resources   = var.backup_resources
-  schedule           = var.schedule
-  start_window       = var.start_window
-  completion_window  = var.completion_window
-  cold_storage_after = var.cold_storage_after
-  delete_after       = var.delete_after
-  kms_key_arn        = aws_kms_key.aws_backup.arn
-  iam_role_enabled   = false
-  iam_role_name      = aws_iam_role.backupper.name
-  depends_on = [
-    aws_iam_role.backupper
-  ]
-  destination_vault_arn = var.copy_destination_vault_arn
+  backup_vault_name = aws_backup_vault.vault.name
+  policy            = var.vault_policy
 }
