@@ -56,16 +56,12 @@ variable "selection" {
   type = object({
     resources : list(string),
     not_resources : list(string),
-    tags : list(object({
-      type  = string
-      key   = string
-      value = string
-    }))
+    condition : any
   })
   default = {
     not_resources = []
     resources     = []
-    tags          = []
+    condition     = {}
   }
   description = "(Optional) Manages selection conditions for AWS Backup plan resources."
 }
