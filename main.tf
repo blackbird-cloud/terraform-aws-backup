@@ -41,14 +41,14 @@ resource "aws_backup_plan" "plan" {
         for_each = lookup(rule.value, "copy_actions", [])
 
         content {
-          destination_vault_arn = lookup(copy_action.value.copy_action, "destination_vault_arn", null)
+          destination_vault_arn = lookup(copy_action.value, "destination_vault_arn", null)
 
           dynamic "lifecycle" {
-            for_each = lookup(copy_action.value.copy_action, "lifecycle", null) != null != null ? [true] : []
+            for_each = lookup(copy_action.value, "lifecycle", null) != null ? [true] : []
 
             content {
-              cold_storage_after = lookup(copy_action.value.copy_action.lifecycle, "cold_storage_after", null)
-              delete_after       = lookup(copy_action.value.copy_action.lifecycle, "delete_after", null)
+              cold_storage_after = lookup(copy_action.value.lifecycle, "cold_storage_after", null)
+              delete_after       = lookup(copy_action.value.lifecycle, "delete_after", null)
             }
           }
         }
