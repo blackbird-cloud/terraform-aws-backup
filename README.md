@@ -33,8 +33,8 @@ No modules.
 | <a name="input_create_backup_region_settings"></a> [create\_backup\_region\_settings](#input\_create\_backup\_region\_settings) | (Optional) Create an AWS Backup Region Settings resource. | `bool` | `true` | no |
 | <a name="input_create_backup_vault_policy"></a> [create\_backup\_vault\_policy](#input\_create\_backup\_vault\_policy) | (Optional) Create an AWS Backup Policy | `bool` | `false` | no |
 | <a name="input_iam_role_arn"></a> [iam\_role\_arn](#input\_iam\_role\_arn) | (Optional) IAM role arn to use when making backups. | `string` | `""` | no |
-| <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | (Optional) The server-side encryption key that is used to protect your backups. | `string` | n/a | yes |
-| <a name="input_name"></a> [name](#input\_name) | Name of backup resource | `string` | n/a | yes |
+| <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | (Required) The server-side encryption key that is used to protect your backups. | `string` | n/a | yes |
+| <a name="input_name"></a> [name](#input\_name) | (Required) Name of backup resource | `string` | n/a | yes |
 | <a name="input_resource_type_management_preference"></a> [resource\_type\_management\_preference](#input\_resource\_type\_management\_preference) | (Optional) A map of services along with the management preferences for the Region. | `any` | <pre>{<br>  "DynamoDB": true,<br>  "EFS": true<br>}</pre> | no |
 | <a name="input_resource_type_opt_in_preference"></a> [resource\_type\_opt\_in\_preference](#input\_resource\_type\_opt\_in\_preference) | (Optional) A map of services along with the opt-in preferences for the Region. | `any` | <pre>{<br>  "Aurora": true,<br>  "DocumentDB": true,<br>  "DynamoDB": true,<br>  "EBS": true,<br>  "EC2": true,<br>  "EFS": true,<br>  "FSx": true,<br>  "Neptune": true,<br>  "RDS": true,<br>  "Storage Gateway": true,<br>  "VirtualMachine": true<br>}</pre> | no |
 | <a name="input_rules"></a> [rules](#input\_rules) | (Optional) An list of rules to create for the backup plan. | `list(any)` | `[]` | no |

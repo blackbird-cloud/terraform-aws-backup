@@ -1,6 +1,6 @@
 variable "name" {
   type        = string
-  description = "Name of backup resource"
+  description = "(Required) Name of backup resource"
 }
 
 variable "create_backup_region_settings" {
@@ -68,7 +68,7 @@ variable "selection" {
 
 variable "kms_key_arn" {
   type        = string
-  description = "(Optional) The server-side encryption key that is used to protect your backups."
+  description = "(Required) The server-side encryption key that is used to protect your backups."
 }
 
 variable "tags" {
