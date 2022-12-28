@@ -34,6 +34,10 @@ variable "resource_type_opt_in_preference" {
     "RDS"             = true
     "Storage Gateway" = true
     "VirtualMachine"  = true
+    "CloudFormation"  = true
+    "Redshift"        = true
+    "Timestream"      = true
+    "S3"              = true
   }
   type        = any
   description = "(Optional) A map of services along with the opt-in preferences for the Region."
