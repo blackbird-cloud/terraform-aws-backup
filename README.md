@@ -1,6 +1,12 @@
-# <Cloud> <Main resource> Terraform module
-A Terraform module which configures your <Cloud> <Main resource>. <Relevant docs>
+# AWS Backup Terraform module
+A Terraform module which configures your [AWS Backup](https://aws.amazon.com/backup/).
+
 [![blackbird-logo](https://raw.githubusercontent.com/blackbird-cloud/terraform-module-template/main/.config/logo_simple.png)](https://www.blackbird.cloud)
+
+## Example
+```hcl
+
+```
 
 ## Requirements
 

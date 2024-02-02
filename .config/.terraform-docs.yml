@@ -14,8 +14,9 @@ sections:
     - modules
 
 content: |-
-  # <Cloud> <Main resource> Terraform module
-  A Terraform module which configures your <Cloud> <Main resource>. <Relevant docs>
+  # AWS Backup Terraform module
+  A Terraform module which configures your [AWS Backup](https://aws.amazon.com/backup/).
+
   {{ .Header }}
 
   ## Example
