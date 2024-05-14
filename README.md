@@ -6,9 +6,10 @@ A Terraform module which configures your [AWS Backup](https://aws.amazon.com/bac
 ## Example
 ```hcl
 module "backup" {
-  source                              = "../"
-  name                                = "centralized-backup"
-  kms_key_arn                         = "arn:aws:kms:us-west-2:xxxxx:key/xxxxxxxxxxxxx"
+  source      = "blackbird-cloud/backup/aws"
+  version     = "~> 1"
+  name        = "centralized-backup"
+  kms_key_arn = "arn:aws:kms:us-west-2:xxxxx:key/xxxxxxxxxxxxx"
 }
 ```
 
@@ -66,4 +67,4 @@ Checkout our other :point\_right: [terraform modules](https://registry.terraform
 
 ## Copyright
 
-Copyright © 2017-2023 [Blackbird Cloud](https://www.blackbird.cloud)
+Copyright © 2017-2024 [Blackbird Cloud](https://www.blackbird.cloud)
