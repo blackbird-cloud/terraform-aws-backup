@@ -14,8 +14,7 @@ sections:
     - modules
 
 content: |-
-  # AWS Backup Terraform module
-  A Terraform module which configures your [AWS Backup](https://aws.amazon.com/backup/).
+  {{ include "./.config/title.md"}}
 
   {{ .Header }}
 
