@@ -1,10 +1,9 @@
 module "backup" {
-  source                     = "blackbird-cloud/backup/aws"
-  version                    = "~> 1"
-  name                       = "centralized-backup"
-  kms_key_arn                = "arn:aws:kms:us-west-2:xxxxx:key/xxxxxxxxxxxxx"
-  create_backup_plan         = true
-  create_backup_vault_policy = true
+  source             = "blackbird-cloud/backup/aws"
+  version            = "~> 1.2.0"
+  name               = "centralized-backup"
+  kms_key_arn        = "arn:aws:kms:us-west-2:xxxxx:key/xxxxxxxxxxxxx"
+  create_backup_plan = true
   resource_type_opt_in_preference = {
     "Aurora" : true,
     "EBS" : true,
