@@ -63,7 +63,7 @@ resource "aws_backup_selection" "selection" {
   count = var.create_backup_plan ? 1 : 0
 
   name          = var.name
-  iam_role_arn  = var.iam_role_arn
+  iam_role_arn  = var.iam_role_arn != "" ? var.iam_role_arn : (var.selection.create_default_role == true || var.iam_role_arn == "" ? aws_iam_role.backup_selection[0].arn : "")
   plan_id       = aws_backup_plan.plan[0].id
   resources     = try(var.selection.resources, [])
   not_resources = try(var.selection.not_resources, [])
@@ -74,29 +74,29 @@ resource "aws_backup_selection" "selection" {
       dynamic "string_equals" {
         for_each = try(var.selection.condition.string_equals, [])
         content {
-          key   = string_equals.value.key
-          value = string_equals.value.value
+          key   = string_equals.key
+          value = string_equals.value
         }
       }
       dynamic "string_like" {
         for_each = try(var.selection.condition.string_like, [])
         content {
-          key   = string_like.value.key
-          value = string_like.value.value
+          key   = string_like.key
+          value = string_like.value
         }
       }
       dynamic "string_not_equals" {
         for_each = try(var.selection.condition.string_not_equals, [])
         content {
-          key   = string_not_equals.value.key
-          value = string_not_equals.value.value
+          key   = string_not_equals.key
+          value = string_not_equals.value
         }
       }
       dynamic "string_not_like" {
         for_each = try(var.selection.condition.string_not_like, [])
         content {
-          key   = string_not_like.value.key
-          value = string_not_like.value.value
+          key   = string_not_like.key
+          value = string_not_like.value
         }
       }
     }
@@ -104,8 +104,34 @@ resource "aws_backup_selection" "selection" {
 }
 
 resource "aws_backup_vault_policy" "policy" {
-  count = var.create_backup_vault_policy ? 1 : 0
+  count = var.create_backup_plan ? 1 : 0
 
   backup_vault_name = aws_backup_vault.vault.name
   policy            = var.vault_policy
+}
+
+# default role for aws_backup_selection if not provided
+data "aws_iam_policy_document" "assume_role" {
+  count = var.create_backup_plan && (var.selection.create_default_role == true || var.iam_role_arn == "") ? 1 : 0
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["backup.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+resource "aws_iam_role" "backup_selection" {
+  count              = var.create_backup_plan && (var.selection.create_default_role == true || var.iam_role_arn == "") ? 1 : 0
+  name               = "backup_selection"
+  assume_role_policy = data.aws_iam_policy_document.assume_role[0].json
+}
+
+resource "aws_iam_role_policy_attachment" "backup_selection" {
+  count      = var.create_backup_plan && (var.selection.create_default_role == true || var.iam_role_arn == "") ? 1 : 0
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
+  role       = aws_iam_role.backup_selection[0].name
 }

@@ -15,12 +15,6 @@ variable "create_backup_plan" {
   description = "(Optional) Create an AWS Backup plan, requires the rules variable to be configured as well."
 }
 
-variable "create_backup_vault_policy" {
-  type        = bool
-  default     = false
-  description = "(Optional) Create an AWS Backup Policy"
-}
-
 variable "resource_type_opt_in_preference" {
   default = {
     "Aurora"          = true
@@ -54,14 +48,14 @@ variable "resource_type_management_preference" {
 
 variable "selection" {
   type = object({
-    resources : list(string),
-    not_resources : list(string),
+    create_default_role : bool,
+    resources : optional(list(string)),
+    not_resources : optional(list(string)),
     condition : any
   })
   default = {
-    not_resources = []
-    resources     = []
-    condition     = {}
+    create_default_role = false
+    condition           = {}
   }
   description = "(Optional) Manages selection conditions for AWS Backup plan resources."
 }
